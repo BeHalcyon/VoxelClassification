@@ -226,6 +226,11 @@ void line_node::output(const char *file_name, int binary)
 	fclose(fo);
 }
 
+real* line_node::getVec()
+{
+	return _vec;
+}
+
 line_hin::line_hin()
 {
 	hin_file[0] = 0;
@@ -305,7 +310,6 @@ line_trainer::line_trainer()
 	u_wei = NULL;
 	v_wei = NULL;
 	smp_u_nb = NULL;
-	expTable = NULL;
 	neg_samples = 0;
 	neg_table = NULL;
 }

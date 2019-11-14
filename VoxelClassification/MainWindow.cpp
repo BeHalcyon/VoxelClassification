@@ -8,6 +8,7 @@
 #include <QDockWidget>
 #include <QDialog>
 #include <QMessageBox>
+#include "VolumeSegmentation.h"
 
 void readInfoFile(const std::string& infoFileName, int& data_number, std::string& datatype, hxy::my_int3& dimension, hxy::my_double3& space,
 	std::vector<std::string>& file_list)
@@ -65,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	slice_view = new SliceView(this);
 
+
+	train_network = nullptr;
 	//QDialog* dialog = new QDialog(slice_view);
 	//dialog->setModal(true);
 	//dialog->show();
@@ -230,15 +233,120 @@ void MainWindow::setConnectionState()
 		train_network = std::make_unique<TrainNetwork>("./workspace/text.node", "./workspace/words.node", "./workspace/text.hin", vector_size,
 			negative_number, sample_number, alpha, num_threads);
 
-
-
 		train_network->TrainModel();
-		std::cout << "00000000000000000000000000000000000000" << std::endl;
 		train_network->saveWordEmbedding();
+		train_network->saveLabelEmbedding();
 
 		showMessageBox("The graph net has been trained.");
-		//std::cout << "111111111111111111111111111" << std::endl;
 	});
+	connect(parameter_control_widget->ui.pushButton_classification_volume, &QPushButton::clicked, [this]()
+	{
+		if(train_network&&!train_network->trainState())
+		{
+			showMessageBox("Please train network first.");
+			return;
+		}
+
+		std::vector<int> segmentation_vector(dimension.x*dimension.y*dimension.z, 0);
+		
+
+		std::map<std::string, std::vector<float>> word_map;
+		std::map<std::string, std::vector<float>> label_map;
+		if(!train_network)
+		{
+			readInfoFile("F:\\TOOTH_8bit_128_128_160\\TOOTH_8bit_128_128_160.vifo", data_number, datatype, dimension, space, file_list);
+			SourceVolume source_volume(file_list, dimension.x, dimension.y, dimension.z, datatype);
+
+			source_volume.loadVolume();
+			source_volume.loadRegularVolume();
+			volume_data = *source_volume.getRegularVolume(0);
+
+			getWordMapFromFile(word_map);
+			getLabelMapFromFile(label_map);
+		}
+		else
+		{
+			word_map = train_network->exportWordVector();
+			label_map = train_network->exportLabelVector();
+		}
+
+		VolumeSegmentation volume_segmentation;
+		volume_segmentation.segemation(volume_data, dimension.x, dimension.y, dimension.z,
+			word_map, label_map,
+			parameter_control_widget->ui.spinBox_window_size_train->value(), 
+			parameter_control_widget->ui.spinBox_vector_size->value(),
+			segmentation_vector);
+
+		volume_segmentation.saveSegmentation(segmentation_vector);
+		showMessageBox("The volume segmentation has been calculated.");
+
+	});
+}
+void MainWindow::getWordMapFromFile(std::map<std::string, std::vector<float>>& word_map)
+{
+	string file_name = "./workspace/word.emb";
+	word_map.clear();
+	ifstream word_file(file_name);
+	int words_number, vector_dimension;
+	word_file >> words_number >> vector_dimension;
+	string word;
+	for (auto i = 0; i < words_number; i++)
+	{
+		word_file >> word;
+		vector<float> word_vector(vector_dimension);
+		for (auto j = 0; j < vector_dimension; j++)
+		{
+			word_file >> word_vector[j];
+			//std::cout << word_vector[j] << " ";
+		}
+		//std::cout << std::endl;
+		word_map[word] = word_vector;
+		
+	}
+	std::cout << "word.emb has been loaded." << std::endl;
+}
+
+bool isNum(string str)
+{
+	std::stringstream sin(str);
+	double d;
+	char c;
+	if (!(sin >> d))
+	{
+		return false;
+	}
+	if (sin >> c)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+void MainWindow::getLabelMapFromFile(std::map<std::string, std::vector<float>>& label_map)
+{
+	string file_name = "./workspace/all_node.emb";
+	label_map.clear();
+	ifstream word_file(file_name);
+	int words_number, vector_dimension;
+	word_file >> words_number >> vector_dimension;
+	string word;
+	for (auto i = 0; i < words_number; i++)
+	{
+		word_file >> word;
+		
+		vector<float> word_vector(vector_dimension);
+		for (auto j = 0; j < vector_dimension; j++)
+		{
+			word_file >> word_vector[j];
+		}
+		if (!word.empty()&&!isNum(word))
+		{
+			label_map[word] = word_vector;
+		}
+		std::cout << word << std::endl;
+	}
+	std::cout << "all_node.emb has been loaded." << std::endl;
 
 }
 

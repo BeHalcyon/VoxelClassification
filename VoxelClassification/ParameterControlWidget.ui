@@ -81,7 +81,7 @@
             <rect>
              <x>10</x>
              <y>20</y>
-             <width>251</width>
+             <width>268</width>
              <height>111</height>
             </rect>
            </property>
@@ -839,26 +839,69 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_36"/>
+       <layout class="QHBoxLayout" name="horizontalLayout_36">
+        <item>
+         <widget class="QGroupBox" name="groupBox_5">
+          <property name="title">
+           <string>Classification Setting</string>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidget_9">
+           <property name="geometry">
+            <rect>
+             <x>9</x>
+             <y>19</y>
+             <width>251</width>
+             <height>161</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_21">
+              <item>
+               <widget class="QPushButton" name="pushButton_similarity_map">
+                <property name="text">
+                 <string>Calculate similarity map</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_23">
+              <item>
+               <widget class="QPushButton" name="pushButton_classification_volume">
+                <property name="text">
+                 <string>Calculate classification volume</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_22">
+              <item>
+               <widget class="QPushButton" name="pushButton_test_image">
+                <property name="text">
+                 <string>Test Image</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_38"/>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_39"/>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>

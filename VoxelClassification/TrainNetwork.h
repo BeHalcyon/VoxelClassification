@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <gsl/gsl_rng.h>
 #include "linelib.h"
+#include <map>
 
 class TrainNetwork
 {
@@ -24,9 +25,12 @@ public:
 	double func_rand_num();
 	void* TrainModelThread(void* id);
 	void TrainModel();
+	void saveLabelEmbedding();
 	void saveWordEmbedding();
+	std::map<std::string, std::vector<hxy::real>> exportLabelVector();
+	std::map<std::string, std::vector<hxy::real>> exportWordVector();
 
-
+	bool trainState() const { return is_trained; }
 	~TrainNetwork();
 
 private:
@@ -45,5 +49,8 @@ private:
 	hxy::line_trainer trainer_lw, trainer_dw, trainer_ww;
 
 	bool		is_trained = false;
+
+	std::map<std::string, std::vector<hxy::real>>	label_map;
+	std::map<std::string, std::vector<hxy::real>>	word_map;
 };
 

@@ -16,6 +16,8 @@ public:
 	MainWindow(QWidget *parent = Q_NULLPTR);
 
 	void setConnectionState();
+	void getWordMapFromFile(std::map<std::string, std::vector<float>>& word_map);
+	void getLabelMapFromFile(std::map<std::string, std::vector<float>>& label_map);
 	bool getDrawedState() const { return is_drawed; }
 
 public slots:

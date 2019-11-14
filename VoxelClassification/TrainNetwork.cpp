@@ -1,7 +1,23 @@
 #include "TrainNetwork.h"
 
+#include <string>
+#include<sstream>
 
-
+bool isNum(char* str)
+{
+	std::stringstream sin(str);
+    double d;
+    char c;
+    if (!(sin >> d))
+    {
+        return false;
+    }
+    if (sin >> c)
+    {
+        return false;
+    }
+    return true;
+}
 
 TrainNetwork::TrainNetwork(const std::string& node_file, const std::string& words_file, const std::string& hin_file,
 	const int& vector_size, const int& negative_number, const long long sample_number, const float& alpha,
@@ -24,7 +40,6 @@ TrainNetwork::TrainNetwork(const std::string& node_file, const std::string& word
 	gsl_r = gsl_rng_alloc(gsl_T);
 	assert(gsl_r);
 	gsl_rng_set(gsl_r, 314159265);
-
 
 }
 
@@ -108,21 +123,79 @@ void TrainNetwork::TrainModel()
 	
 	//words.outputSimilarity(output_file, binary);
 }
-void TrainNetwork::saveWordEmbedding()
+void TrainNetwork::saveLabelEmbedding()
 {
 	if(!is_trained)
 	{
 		TrainModel();
 	}
-	words.output(output_file.c_str(), binary);
+	nodes.output("./workspace/all_node.emb", binary);
+}
+void TrainNetwork::saveWordEmbedding()
+{
+	if (!is_trained)
+	{
+		TrainModel();
+	}
+	words.output("./workspace/word.emb", binary);
+}
+
+std::map<std::string, std::vector<hxy::real>> TrainNetwork::exportLabelVector()
+{
+	if (!is_trained)
+	{
+		TrainModel();
+	}
+
+	label_map.clear();
+
+	auto node_vec = nodes.getVec();
+	auto node_nodes = nodes.getNode();
+
+	for(auto i=0;i<nodes.getNodeSize();i++)
+	{
+
+		if(!isNum(node_nodes[i].word))		//不是一个数字，说明是label
+		{
+			std::vector<hxy::real> node_vector(vector_size, 0);
+
+			for (auto j = 0; j < vector_size; j++)
+				node_vector[j] = node_vec[i*vector_size + j];
+			label_map[std::string(node_nodes[i].word)] = node_vector;
+		}
+	}
+	std::cout << "Label vector has been exported." << std::endl;
+	return label_map;
+}
+
+std::map<std::string, std::vector<hxy::real>> TrainNetwork::exportWordVector()
+{
+	if (!is_trained)
+	{
+		TrainModel();
+	}
+
+	word_map.clear();
+
+	auto word_vec = words.getVec();
+	auto word_nodes = words.getNode();
+	for (auto i = 0; i < words.getNodeSize(); i++)
+	{
+
+		std::vector<hxy::real> node_vector(vector_size, 0);
+
+		for (auto j = 0; j < vector_size; j++)
+			node_vector[j] = word_vec[i*vector_size + j];
+		word_map[std::string(word_nodes[i].word)] = node_vector;
+	}
+	std::cout << "Word vector has been exported." << std::endl;
+	return word_map;
 }
 
 TrainNetwork::~TrainNetwork()
 {
 	if(gsl_r)
 	{
-		std::cout << "-------you" << std::endl;
 		gsl_rng_free(gsl_r);
-		std::cout << "------------------------I-----------------------love -----------------you" << std::endl;
 	}
 }

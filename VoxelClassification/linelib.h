@@ -77,6 +77,11 @@ public:
 	void init(const char *file_name, int vector_dim);
 	int search(char *word);
 	void output(const char *file_name, int binary);
+
+	int getNodeSize() const { return node_size; }
+	struct struct_node* getNode()	const { return node; }
+
+	real* getVec();
 };
 
 class line_hin
