@@ -5,16 +5,40 @@ VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VoxelClassification", "VoxelClassification\VoxelClassification.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PTETrain", "PTETrain\PTETrain.vcxproj", "{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VolumeSegmentation", "VolumeSegmentation\VolumeSegmentation.vcxproj", "{9CF7F590-B292-4C35-9164-058CF4F96B55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.ActiveCfg = Debug|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|x64
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Debug|x64.ActiveCfg = Debug|x64
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Debug|x64.Build.0 = Debug|x64
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Debug|x86.ActiveCfg = Debug|Win32
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Debug|x86.Build.0 = Debug|Win32
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Release|x64.ActiveCfg = Release|x64
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Release|x64.Build.0 = Release|x64
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Release|x86.ActiveCfg = Release|Win32
+		{F1C36C2E-DA4E-45E1-9F46-71503C7053BC}.Release|x86.Build.0 = Release|Win32
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Debug|x64.ActiveCfg = Debug|x64
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Debug|x64.Build.0 = Debug|x64
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Debug|x86.ActiveCfg = Debug|Win32
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Debug|x86.Build.0 = Debug|Win32
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Release|x64.ActiveCfg = Release|x64
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Release|x64.Build.0 = Release|x64
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Release|x86.ActiveCfg = Release|Win32
+		{9CF7F590-B292-4C35-9164-058CF4F96B55}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -25,8 +25,9 @@ public:
 	double func_rand_num();
 	void* TrainModelThread(void* id);
 	void TrainModel();
-	void saveLabelEmbedding();
-	void saveWordEmbedding();
+	void saveLabelEmbedding(const std::string& file_name = "./workspace/all_node.emb");
+	
+	void saveWordEmbedding(const std::string& file_name = "./workspace/word.emb");
 	std::map<std::string, std::vector<hxy::real>> exportLabelVector();
 	std::map<std::string, std::vector<hxy::real>> exportWordVector();
 

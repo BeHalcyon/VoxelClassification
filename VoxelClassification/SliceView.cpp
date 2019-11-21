@@ -209,6 +209,18 @@ void SliceView::createNewPathItemArray(const QString& label_name)
 	path_id_map[label_name] = paths_list.size() - 1;
 }
 
+void SliceView::deleteAllItems()
+{
+	for (auto i : graphics_scene->items())
+	{
+		if(i->type()==QGraphicsPathItem::Type)
+			graphics_scene->removeItem(i);
+	}
+	paths_list.clear();
+	path_id_map.clear();
+	//可能存在内存泄漏风险
+}
+
 void SliceView::setLabel(const QString& label_name)
 {
 	if(path_id_map.find(label_name)!=path_id_map.end())

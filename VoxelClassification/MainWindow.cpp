@@ -10,6 +10,26 @@
 #include <QMessageBox>
 #include "VolumeSegmentation.h"
 
+
+struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
+{
+	VM_JSON_FIELD(std::string, vifo_file_name);
+	VM_JSON_FIELD(int, volume_index);
+
+	VM_JSON_FIELD(std::string, file_prefix);
+
+
+	VM_JSON_FIELD(std::string, output_ww_net);
+	VM_JSON_FIELD(std::string, output_word_node);
+	VM_JSON_FIELD(std::string, output_lw_net);
+	VM_JSON_FIELD(std::string, output_label_node);
+	VM_JSON_FIELD(std::string, output_text_hin);
+	VM_JSON_FIELD(std::string, output_text_node);
+	VM_JSON_FIELD(int, window_size);
+	VM_JSON_FIELD(int, edge_weight_type);
+}JSON;
+
+
 void readInfoFile(const std::string& infoFileName, int& data_number, std::string& datatype, hxy::my_int3& dimension, hxy::my_double3& space,
 	std::vector<std::string>& file_list)
 {
@@ -79,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setConnectionState()
 {
 	connect(ui.action_vifo, &QAction::triggered, this, &MainWindow::slot_ImportVifoFile);
+	connect(ui.action_json, &QAction::triggered, this, &MainWindow::slot_ImportJsonFile);
 	connect(parameter_control_widget->ui.comboBox_Slice_Direction, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
 	{
 		if (index == 0)
@@ -122,6 +143,10 @@ void MainWindow::setConnectionState()
 
 	connect(parameter_control_widget->ui.pushButton_add_label, &QPushButton::clicked, [this]()
 	{
+		if (!is_drawed)
+		{
+			showMessageBox("Please load vifo file first.");
+		}
 		const auto label_name = parameter_control_widget->ui.line_edit_new_label_name->text();
 
 		auto combo_list = parameter_control_widget->ui.comboBox_label_name_list;
@@ -131,8 +156,20 @@ void MainWindow::setConnectionState()
 		}
 		combo_list->addItem(label_name);
 		slice_view->createNewPathItemArray(label_name);
-	});
 
+		//const auto label_name = parameter_control_widget->ui.comboBox_label_name_list->currentText();
+		slice_view->setLabel(label_name);
+		parameter_control_widget->ui.line_edit_new_label_name->setText("label:Name");
+	});
+	connect(parameter_control_widget->ui.pushButton_delete_label,&QPushButton::clicked,[this]()
+	{
+		if(slice_view)
+		{
+			slice_view->deleteAllItems();
+		}
+		parameter_control_widget->ui.line_edit_new_label_name->setText("label:Name");
+		parameter_control_widget->ui.comboBox_label_name_list->clear();
+	});
 	connect(parameter_control_widget->ui.pushButton_select_label, &QPushButton::clicked, [this]()
 	{
 		const auto label_name = parameter_control_widget->ui.comboBox_label_name_list->currentText();
@@ -197,12 +234,20 @@ void MainWindow::setConnectionState()
 	});
 
 
+
 	connect(parameter_control_widget->ui.pushButton_save_ww_net, &QPushButton::clicked, this, &MainWindow::slot_SaveWWNet);
 	connect(parameter_control_widget->ui.pushButton_save_lw_net, &QPushButton::clicked, this, &MainWindow::slot_SaveLWNet);
 	connect(parameter_control_widget->ui.pushButton_save_words_node, &QPushButton::clicked, this, &MainWindow::slot_SaveWordNode);
 	connect(parameter_control_widget->ui.pushButton_save_labels_node, &QPushButton::clicked, this, &MainWindow::slot_SaveLabelNode);
 	connect(parameter_control_widget->ui.pushButton_save_word_label_node, &QPushButton::clicked, this, &MainWindow::slot_SaveWordLabelNode);
-	connect(parameter_control_widget->ui.pushButton__save_ww_lw_net, &QPushButton::clicked, this, &MainWindow::slot_SaveWordLabelNet);
+	connect(parameter_control_widget->ui.pushButton__save_ww_lw_net, &QPushButton::clicked, [this]()
+	{
+		if (is_json_file_loaded)
+			slot_SaveWordLabelNet(JSON.edge_weight_type);
+		//默认权重为1
+		else
+			slot_SaveWordLabelNet();
+	});
 	connect(parameter_control_widget->ui.pushButton_save_all_middle_file, &QPushButton::clicked, [this]()
 	{
 		slot_SaveWWNet();
@@ -210,7 +255,12 @@ void MainWindow::setConnectionState()
 		slot_SaveWordNode();
 		slot_SaveLabelNode();
 		slot_SaveWordLabelNode();
-		slot_SaveWordLabelNet();
+
+		if (is_json_file_loaded)
+			slot_SaveWordLabelNet(JSON.edge_weight_type);
+		//默认权重为1
+		else
+			slot_SaveWordLabelNet();
 	});
 	connect(parameter_control_widget->ui.pushButton_save_net_node, &QPushButton::clicked, [this]()
 	{
@@ -247,13 +297,15 @@ void MainWindow::setConnectionState()
 			return;
 		}
 
-		std::vector<int> segmentation_vector(dimension.x*dimension.y*dimension.z, 0);
-		
-
 		std::map<std::string, std::vector<float>> word_map;
 		std::map<std::string, std::vector<float>> label_map;
 		if(!train_network)
 		{
+			// QString fileName = QFileDialog::getOpenFileName(this, "Open vifo File", "J:/science data/4 Combustion/jet_0051/",
+			// 	tr("VIFO (*.vifo )"));
+			// if (fileName.isEmpty())
+			// 	return;
+			// infoFileName = fileName.toStdString();
 			readInfoFile("F:\\TOOTH_8bit_128_128_160\\TOOTH_8bit_128_128_160.vifo", data_number, datatype, dimension, space, file_list);
 			SourceVolume source_volume(file_list, dimension.x, dimension.y, dimension.z, datatype);
 
@@ -270,18 +322,21 @@ void MainWindow::setConnectionState()
 			label_map = train_network->exportLabelVector();
 		}
 
+		std::vector<int> segmentation_vector(dimension.x*dimension.y*dimension.z, 0);
+
 		VolumeSegmentation volume_segmentation;
 		volume_segmentation.segemation(volume_data, dimension.x, dimension.y, dimension.z,
-			word_map, label_map,
-			parameter_control_widget->ui.spinBox_window_size_train->value(), 
-			parameter_control_widget->ui.spinBox_vector_size->value(),
-			segmentation_vector);
+		                               word_map, label_map,
+		                               parameter_control_widget->ui.spinBox_window_size_train->value(), 
+		                               parameter_control_widget->ui.spinBox_vector_size->value(),
+		                               segmentation_vector, parameter_control_widget->ui.doubleSpinBox_threshold->value());
 
 		volume_segmentation.saveSegmentation(segmentation_vector);
 		showMessageBox("The volume segmentation has been calculated.");
 
 	});
 }
+
 void MainWindow::getWordMapFromFile(std::map<std::string, std::vector<float>>& word_map)
 {
 	string file_name = "./workspace/word.emb";
@@ -364,7 +419,7 @@ void MainWindow::slot_ExportNetAndNodeFile()
 
 
 	//获取window size
-	int window_size = 3;
+	int window_size = parameter_control_widget->ui.spinBox_window_size->value();
 	const auto sz = dimension.x*dimension.y*dimension.z;
 	context_label.resize(label_array.size());
 	for (auto i = 0; i < context_label.size(); i++) context_label[i].resize(256);
@@ -497,6 +552,55 @@ void MainWindow::slot_ImportVifoFile()
 	is_vifo_file_loaded = true;
 }
 
+void MainWindow::slot_ImportJsonFile()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, "Open json File", "./",
+		tr("JSON (*.json )"));
+
+	if (fileName.isEmpty())
+		return;
+
+	std::ifstream input_file(fileName.toStdString());
+	input_file >> JSON;
+
+	infoFileName = JSON.vifo_file_name;
+
+	auto volume_index = JSON.volume_index;
+	//infoFileName = fileName.toStdString();
+	readInfoFile(infoFileName, data_number, datatype, dimension, space, file_list);
+
+
+	file_path = file_list[volume_index].substr(0, file_list[volume_index].find_last_of('.'));
+
+	source_volume = SourceVolume(file_list, dimension.x, dimension.y, dimension.z, datatype);
+
+	//source_volume.loadVolume();	//origin data
+	source_volume.loadRegularVolume(); //[0, 255] data
+
+	volume_data = *source_volume.getRegularVolume(0);
+
+	std::cout << "The regular volume data has been loaded." << std::endl;
+
+	parameter_control_widget->ui.spinBox_XDim->setValue(dimension.x);
+	parameter_control_widget->ui.spinBox_XDim->setEnabled(false);
+	parameter_control_widget->ui.spinBox_YDim->setValue(dimension.y);
+	parameter_control_widget->ui.spinBox_YDim->setEnabled(false);
+	parameter_control_widget->ui.spinBox_ZDim->setValue(dimension.z);
+	parameter_control_widget->ui.spinBox_ZDim->setEnabled(false);
+
+	parameter_control_widget->ui.spinBox_Slice_index->setMaximum(dimension.z - 1);
+
+	slice_view->updateImage(volume_data, dimension, plane_mode, slice_id);
+
+	is_drawed = true;
+	is_volume2word_calculated = false;
+	is_vifo_file_loaded = true;
+
+	is_json_file_loaded = true;
+
+	parameter_control_widget->ui.spinBox_window_size->setValue(JSON.window_size);
+}
+
 void MainWindow::slot_SaveWWNet()
 {
 	if(!is_vifo_file_loaded)
@@ -512,14 +616,21 @@ void MainWindow::slot_SaveWWNet()
 			parameter_control_widget->ui.spinBox_window_size->value());
 		is_volume2word_calculated = true;
 	}
-	volume2word.saveNet();
-	//std::cout << "ww.net has been saved in ./workspace/ww.net" << std::endl;
-	showMessageBox("ww.net has been saved in ./workspace/ww.net");
+	if(is_json_file_loaded)
+	{
+		volume2word.saveNet(JSON.file_prefix + JSON.output_ww_net);
+	}
+	else
+	{
+		volume2word.saveNet();
+	}
+	std::cout << "ww.net has been saved in ./workspace/...ww.net" << std::endl;
+	//showMessageBox("ww.net has been saved in ./workspace/ww.net");
 }
 
 void MainWindow::slot_SaveWordNode()
 {
-	if (!is_vifo_file_loaded)
+	if (!(is_vifo_file_loaded|| is_json_file_loaded))
 	{
 		showMessageBox("Please load vifo file first!");
 		return;
@@ -532,9 +643,17 @@ void MainWindow::slot_SaveWordNode()
 			parameter_control_widget->ui.spinBox_window_size->value());
 		is_volume2word_calculated = true;
 	}
-	volume2word.saveWords();
-	//std::cout << "words.node has been saved in ./workspace/ww.net" << std::endl;
-	showMessageBox("words.node has been saved in ./workspace/words.node");
+	if (is_json_file_loaded)
+	{
+		volume2word.saveWords(JSON.file_prefix + JSON.output_word_node);
+	}
+	else
+	{
+		volume2word.saveWords();
+	}
+	
+	std::cout << "words.node has been saved in ./workspace/...words.node" << std::endl;
+	//showMessageBox("words.node has been saved in ./workspace/words.node");
 }
 
 void MainWindow::calcLabelArray()
@@ -620,7 +739,7 @@ void MainWindow::calcLabelArray()
 
 void MainWindow::slot_SaveLWNet()
 {
-	if (!is_vifo_file_loaded)
+	if (!(is_vifo_file_loaded || is_json_file_loaded))
 	{
 		showMessageBox("Please load vifo file first!");
 		return;
@@ -628,7 +747,17 @@ void MainWindow::slot_SaveLWNet()
 
 	calcLabelArray();
 
-	auto fo = fopen("./workspace/lw.net", "wb");
+	FILE* fo = nullptr;
+	if(is_json_file_loaded)
+	{
+		std::string file_name = JSON.file_prefix + JSON.output_word_node;
+		fo = fopen(file_name.c_str(), "wb");
+	}
+	else
+	{
+		fo = fopen("./workspace/lw.net", "wb");
+	}
+	
 	//以label为数量循环
 	auto combo = parameter_control_widget->ui.comboBox_label_name_list;
 
@@ -644,21 +773,29 @@ void MainWindow::slot_SaveLWNet()
 		}
 	}
 	fclose(fo);
-	//std::cout << "label-word net has been saved in ./workspace/lw.net" << std::endl;
-	showMessageBox("label-word net has been saved in ./workspace/lw.net");
+	std::cout << "label-word net has been saved in ./workspace/...lw.net" << std::endl;
+	//showMessageBox("label-word net has been saved in ./workspace/lw.net");
 }
 
 void MainWindow::slot_SaveLabelNode()
 {
-	if (!is_vifo_file_loaded)
+	if (!(is_vifo_file_loaded || is_json_file_loaded))
 	{
 		showMessageBox("Please load vifo file first!");
 		return;
 	}
 
 	calcLabelArray();
-
-	auto fo = fopen("./workspace/labels.node", "wb");
+	FILE* fo = nullptr;
+	if(is_json_file_loaded)
+	{
+		std::string file_name = JSON.file_prefix + JSON.output_label_node;
+		fo = fopen(file_name.c_str(), "wb");
+	}
+	else
+	{
+		fo = fopen("./workspace/labels.node", "wb");
+	}
 	auto combo = parameter_control_widget->ui.comboBox_label_name_list;
 	for (auto i = 0; i < combo->count(); i++)
 	{
@@ -666,13 +803,13 @@ void MainWindow::slot_SaveLabelNode()
 		fprintf(fo, "%s\n", label_name.toStdString().c_str());
 	}
 	fclose(fo);
-	showMessageBox("label-word net has been saved in ./workspace/lw.net");
-	//std::cout << "label-word net has been saved in ./workspace/lw.net" << std::endl;
+	//showMessageBox("label-word net has been saved in ./workspace/lw.net");
+	std::cout << "label-word net has been saved in ./workspace/...lw.net" << std::endl;
 }
 
-void MainWindow::slot_SaveWordLabelNet()
+void MainWindow::slot_SaveWordLabelNet(const int edge_weight_type)
 {
-	if (!is_vifo_file_loaded)
+	if (!(is_vifo_file_loaded || is_json_file_loaded))
 	{
 		showMessageBox("Please load vifo file first!");
 		return;
@@ -686,10 +823,41 @@ void MainWindow::slot_SaveWordLabelNet()
 		is_volume2word_calculated = true;
 	}
 	auto neighbor_histogram = volume2word.getNeighborHistogram();
-	
 
-	auto fo = fopen("./workspace/text.hin", "wb");
+	//使用原始的权重列表
+	if(edge_weight_type == 1)
+	{
+		
+	}
+	//使用规则化权重列表
+	else if(edge_weight_type == 2)
+	{
+		for (auto& i : neighbor_histogram)
+		{
+			auto max_value = 0.0;
+			for (double j : i)
+			{
+				max_value = std::max(max_value, j);
+			}
+			if (max_value == 0.0) continue;
+			
+			for (double& j : i)
+			{
+				j /=max_value;
+			}
+		}
+	}
 
+	FILE *fo = nullptr;
+	if(is_json_file_loaded)
+	{
+		std::string file_name = JSON.file_prefix + JSON.output_text_hin;
+		fo = fopen(file_name.c_str(), "wb");
+	}
+	else
+	{
+		fo = fopen("./workspace/text.hin", "wb");
+	}
 	auto cnt = 0;
 	for (auto i = 0; i < HISTOGRAM_SIZE; i++)
 	{
@@ -702,8 +870,9 @@ void MainWindow::slot_SaveWordLabelNet()
 			}
 			if (neighbor_histogram[i][j] > 0)
 			{
-				fprintf(fo, "%s %s %d w\n",
-					std::to_string(i).c_str(), std::to_string(j).c_str(), neighbor_histogram[i][j]);
+				//Debug 20191121
+				fprintf(fo, "%s %s %lf w\n", std::to_string(i).c_str(), std::to_string(j).c_str(), edge_weight_type ? neighbor_histogram[i][j] : 1);
+				//fprintf(fo, "%s %s %d w\n", std::to_string(i).c_str(), std::to_string(j).c_str(), 1);
 			}
 			cnt++;
 		}
@@ -720,20 +889,22 @@ void MainWindow::slot_SaveWordLabelNet()
 		{
 			if (context_label[m][n] > 0)
 			{
-				fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, context_label[m][n]);
+				//Debug 20191121
+				//fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, context_label[m][n]);
+				fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, edge_weight_type ? context_label[m][n]:1);
 			}
 		}
 	}
 	fclose(fo);
 
-	showMessageBox("ww net and label net have been merged together in ./workspace/text.hin");
+	//showMessageBox("ww net and label net have been merged together in ./workspace/text.hin");
 
-	//std::cout << "ww.net has been saved in ./workspace/ww.net" << std::endl;
+	std::cout << "ww net and label net have been merged together in ./workspace/...text.hin" << std::endl;
 }
 
 void MainWindow::slot_SaveWordLabelNode()
 {
-	if (!is_vifo_file_loaded)
+	if (!(is_vifo_file_loaded || is_json_file_loaded))
 	{
 		showMessageBox("Please load vifo file first!");
 		return;
@@ -748,8 +919,17 @@ void MainWindow::slot_SaveWordLabelNode()
 	}
 
 
+	FILE* fo;
+	if(is_json_file_loaded)
+	{
+		std::string file_name = JSON.file_prefix + JSON.output_text_node;
+		fo = fopen(file_name.c_str(), "w");
+	}
+	else
+	{
+		fo = fopen("./workspace/text.node", "w");
+	}
 
-	FILE* fo = fopen("./workspace/text.node", "w");
 	for (int k = 0; k < volume2word.getVertexNumber(); k++)
 		fprintf(fo, "%s\n", std::to_string(volume2word.getIntWordByHashID(k)).c_str());
 
@@ -762,5 +942,6 @@ void MainWindow::slot_SaveWordLabelNode()
 	}
 	fclose(fo);
 
-	showMessageBox("words node and labels node have been merged together in ./workspace/text.node");
+	//showMessageBox("words node and labels node have been merged together in ./workspace/text.node");
+	std::cout << "words node and labels node have been merged together in ./workspace/text.node" << std::endl;
 }

@@ -123,21 +123,21 @@ void TrainNetwork::TrainModel()
 	
 	//words.outputSimilarity(output_file, binary);
 }
-void TrainNetwork::saveLabelEmbedding()
+void TrainNetwork::saveLabelEmbedding(const std::string & file_name)
 {
 	if(!is_trained)
 	{
 		TrainModel();
 	}
-	nodes.output("./workspace/all_node.emb", binary);
+	nodes.output(file_name.c_str(), binary);
 }
-void TrainNetwork::saveWordEmbedding()
+void TrainNetwork::saveWordEmbedding(const std::string & file_name)
 {
 	if (!is_trained)
 	{
 		TrainModel();
 	}
-	words.output("./workspace/word.emb", binary);
+	words.output(file_name.c_str(), binary);
 }
 
 std::map<std::string, std::vector<hxy::real>> TrainNetwork::exportLabelVector()

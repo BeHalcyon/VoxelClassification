@@ -12,7 +12,8 @@ VolumeSegmentation::VolumeSegmentation()
 
 void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_data, const int& width, const int& height,
 	const int& depth, std::map<std::string, std::vector<float>>&word_map,
-	std::map<std::string, std::vector<float>>&label_map, const int & window_size, const int & vector_size, std::vector<int>& segementaion_data)
+	std::map<std::string, std::vector<float>>&label_map, const int & window_size, const int & vector_size, std::vector<int>& segementaion_data,
+	const double & threshold)
 {
 	const auto sz = width * height * depth;
 	
@@ -22,7 +23,7 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 	const auto& zDim = depth;
 
 	auto label_number = label_map.size();
-	std::vector<std::string> label_id_vector(label_number);
+	std::vector<std::string> label_id_vector;
 	for(auto& based: label_map)
 	{
 		label_id_vector.push_back(based.first);
@@ -89,12 +90,14 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 				if(buf > max_value)
 				{
 					max_value = buf;
-					cnt = n;
+					cnt = n+1;
 				}
 			}
-			//TODO 修改id
+			if(max_value < threshold)
+			{
+				cnt = 0;
+			}
 			segementaion_data[index] = 10*cnt;
-
 		}
 	}
 	else if (window_size == 1)
@@ -145,6 +148,7 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 			//判断该数组与label数组的关系
 			double max_value = -0xffffff;
 
+			//cnt为0是背景
 			cnt = 0;
 
 			for (auto n = 0; n < label_id_vector.size(); n++)
@@ -159,10 +163,14 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 				if (buf > max_value)
 				{
 					max_value = buf;
-					cnt = n;
+					cnt = n+1;
 				}
 			}
-			//TODO 修改id
+			if (max_value < threshold)
+			{
+				cnt = 0;
+			}
+
 			segementaion_data[index] = 10 * cnt;
 
 		}
@@ -181,12 +189,13 @@ VolumeSegmentation::~VolumeSegmentation()
 {
 }
 
-void VolumeSegmentation::saveSegmentation(const std::vector<int>& segmentation_volume)
+void VolumeSegmentation::saveSegmentation(
+	const std::vector<int>& segmentation_volume, const std::string & file_name)
 {
 
 	int sz = segmentation_volume.size();
 
-	std::ofstream outfile("./workspace/pte_segmentation_volume.raw", std::ios::binary);
+	std::ofstream outfile(file_name, std::ios::binary);
 	for (int i = 0; i < sz; i++)
 	{
 		outfile.write((char*)(&segmentation_volume[i]), sizeof(int));

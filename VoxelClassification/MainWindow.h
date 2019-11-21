@@ -7,6 +7,8 @@
 #include "SliceView.h"
 #include "data2word.h"
 #include "TrainNetwork.h"
+#include <VMUtils/json_binding.hpp>
+
 
 class MainWindow : public QMainWindow
 {
@@ -22,12 +24,13 @@ public:
 
 public slots:
 	void slot_ImportVifoFile();
+	void slot_ImportJsonFile();
 	void slot_SaveWWNet();
 	void slot_SaveWordNode();
 	void calcLabelArray();
 	void slot_SaveLWNet();
 	void slot_SaveLabelNode();
-	void slot_SaveWordLabelNet();
+	void slot_SaveWordLabelNet(const int edge_weight_type = 0);
 	void slot_SaveWordLabelNode();
 	void slot_ExportNetAndNodeFile();
 
@@ -58,4 +61,5 @@ private:
 	QVector<QVector<int>>	context_label;
 
 	std::unique_ptr<TrainNetwork>			train_network;
+	bool					is_json_file_loaded = false;
 };

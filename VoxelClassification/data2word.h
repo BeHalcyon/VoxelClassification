@@ -27,7 +27,7 @@ public:
 	void saveNet(const std::string & output_net_file = "./workspace/ww.net");
 	void saveWords(const std::string & output_words_file = "./workspace/words.node");
 	int getIntWordByHashID(int k);
-	std::vector<std::vector<int>> getNeighborHistogram() const;
+	std::vector<std::vector<double>> getNeighborHistogram() const;
 	int getVertexNumber() const {
 		return num_vertices;
 	}
@@ -43,7 +43,7 @@ protected:
 private:
 
 	//int neighbor_histogram[HISTOGRAM_SIZE][HISTOGRAM_SIZE];
-	std::vector<std::vector<int>>		neighbor_histogram;
+	std::vector<std::vector<double>>	neighbor_histogram;
 	long long							totaltoken = 0;
 	int									min_count = 0;
 	int									window_size = 3;

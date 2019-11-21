@@ -1,0 +1,13 @@
+{
+  "vector_size": 100,
+  "sample_number": 300,
+  "alpha": 0.025,
+  "thread_number": 6,
+  "negative_number": 5,
+  "file_prefix": "J:/PTE buffer/TOOTH_8bit_128_128_160_",
+  "input_text_node": "text.node",
+  "input_word_node": "words.node",
+  "input_text_hin": "text.hin",
+  "output_word_embedding": "word.emb",
+  "output_node_embedding": "all_node.emb"
+}

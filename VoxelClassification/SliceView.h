@@ -21,6 +21,7 @@ public:
 	void wheelEvent(QWheelEvent *event) override;
 
 	void createNewPathItemArray(const QString & label_name);
+	void deleteAllItems();
 	void setLabel(const QString& label_name);
 
 	void updateImage(std::vector<unsigned char>& volume_data, const hxy::my_int3& dimension, const int & plane_id, const int & slice_number);

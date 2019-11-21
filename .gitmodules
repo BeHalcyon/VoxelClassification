@@ -1,0 +1,3 @@
+[submodule ".\\VoxelClassification\\VMUtils"]
+	path = .\\VoxelClassification\\VMUtils
+	url = https://github.com/cad420/VMUtils.git

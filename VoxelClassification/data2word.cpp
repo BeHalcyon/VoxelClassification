@@ -19,7 +19,7 @@ Volume2Word::~Volume2Word()
 	vertex_hash_table.clear();
 }
 
-std::vector<std::vector<int>> Volume2Word::getNeighborHistogram() const
+std::vector<std::vector<double>> Volume2Word::getNeighborHistogram() const
 {
 	return neighbor_histogram;
 }
@@ -228,8 +228,8 @@ void Volume2Word::saveNet(const std::string& output_net_file)
 			}
 			if (neighbor_histogram[i][j] > 0)
 			{
-				fprintf(fo, "%s\t%s\t%d\t\tw\n", 
-					std::to_string(i).c_str(), std::to_string(j).c_str(), neighbor_histogram[i][j]);
+				fprintf(fo, "%s\t%s\t%lf\t\tw\n", 
+					std::to_string(i).c_str(), std::to_string(j).c_str(), neighbor_histogram[i][j]*1.0f);
 			}
 			cnt++;
 		}

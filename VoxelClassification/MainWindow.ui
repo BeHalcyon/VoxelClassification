@@ -38,6 +38,7 @@
       <string>Import</string>
      </property>
      <addaction name="action_vifo"/>
+     <addaction name="action_json"/>
     </widget>
     <widget class="QMenu" name="menuExport">
      <property name="title">
@@ -73,6 +74,11 @@
   <action name="action_node">
    <property name="text">
     <string>*.node</string>
+   </property>
+  </action>
+  <action name="action_json">
+   <property name="text">
+    <string>*.json</string>
    </property>
   </action>
  </widget>

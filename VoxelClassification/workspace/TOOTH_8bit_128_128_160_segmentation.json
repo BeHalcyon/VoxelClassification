@@ -1,0 +1,9 @@
+{
+  "vifo_file_name": "F:/TOOTH_8bit_128_128_160/TOOTH_8bit_128_128_160.vifo",
+  "volume_index": 0,
+  "file_prefix": "J:/PTE buffer/TOOTH_8bit_128_128_160_",
+  "segmentation_file_name": "segmentation.raw",
+  "window_size": 3,
+  "word_file_name": "word.emb",
+  "label_file_name": "all_node.emb"
+}
