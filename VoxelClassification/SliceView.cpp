@@ -64,14 +64,16 @@ void SliceView::mouseMoveEvent(QMouseEvent* event)
 
 void SliceView::mousePressEvent(QMouseEvent* event)
 {
-	if(paths_list.empty())
-	{
-		qDebug() << "Error: please create label first.";
-		return;
-	}
+	
 
 	if(event->buttons() & Qt::LeftButton)
 	{
+		if (paths_list.empty())
+		{
+			qDebug() << "Error: please create label first.";
+			return;
+		}
+
 		if(pixmap_item)
 		{
 			qDebug() << "Global position : " << event->pos();
@@ -98,19 +100,19 @@ void SliceView::mouseReleaseEvent(QMouseEvent* event)
 
 	if (is_mouse_left_pressed)
 	{
-		qDebug() << "test";
+		//qDebug() << "test";
 		if (pixmap_item)
 		{
 			paths_list[current_label_id][plane_id][slice_number].push_back(cur_path);
 
-			qDebug() << "cur_path size : " << cur_paint_path;
+			//qDebug() << "cur_path size : " << cur_paint_path;
 			is_mouse_left_pressed = false;
 
 			emit signal_updateLableNumber(paths_list);
 
 		}
 	}
-	qDebug() << "test2";
+	//qDebug() << "test2";
 	QGraphicsView::mouseReleaseEvent(event);
 }
 
@@ -253,7 +255,7 @@ void SliceView::updateImage(std::vector<unsigned char>& volume_data, const hxy::
 	graphics_scene->setSceneRect(0, 0, width(), height());
 	graphics_scene->setBackgroundBrush(QBrush(Qt::white));
 	//centerOn(width() / 2, height() / 2);
-	std::cout << "Width and height : " << width() << "\t" << height() << std::endl;
+	//std::cout << "Width and height : " << width() << "\t" << height() << std::endl;
 	pixmap_item = graphics_scene->addPixmap(pixmap);
 	pixmap_item->setPos((width() - pixmap.width()) / 2, (height()-pixmap.height()) / 2);
 

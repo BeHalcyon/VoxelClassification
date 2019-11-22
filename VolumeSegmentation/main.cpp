@@ -108,7 +108,7 @@ void getLabelMapFromFile(const std::string & file_name, std::map<std::string, st
 		{
 			label_map[word] = word_vector;
 		}
-		std::cout << word << std::endl;
+		//std::cout << word << std::endl;
 	}
 	std::cout << "all_node.emb has been loaded." << std::endl;
 
@@ -121,6 +121,8 @@ struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
 {
 	VM_JSON_FIELD(int, window_size);
 	VM_JSON_FIELD(int, volume_index);
+	VM_JSON_FIELD(double, threshold);
+
 
 	VM_JSON_FIELD(std::string, vifo_file_name);
 	VM_JSON_FIELD(std::string, file_prefix);
@@ -128,7 +130,6 @@ struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
 	VM_JSON_FIELD(std::string, label_file_name);
 	VM_JSON_FIELD(std::string, segmentation_file_name);
 	
-
 }JSON;
 
 
@@ -148,11 +149,12 @@ int main(int argc, char* argv[])
 		// create a parser
 		cmdline::parser a;
 		a.add<std::string>("configure_file", 'c', "configure json file for segmentation", true, "");
-		a.add<double>("threshold", 't', "threshold for filter large different voxels", false, -1.0, cmdline::range(-100,100));
+		a.add<double>("threshold", 't', "threshold for filter large different voxels", 
+			false, -0xfffff, cmdline::range<double>(-0xfffff,100));
 		
 		a.parse_check(argc, argv);
 
-		json_file_path = a.get<std::string>("train_file");
+		json_file_path = a.get<std::string>("configure_file");
 		threshold = a.get<double>("threshold");
 	}
 
@@ -182,6 +184,9 @@ int main(int argc, char* argv[])
 		int volume_index = JSON.volume_index;
 		std::string segmentation_file_name = file_prefix + JSON.segmentation_file_name;
 
+		if (threshold == -0xfffff) threshold = JSON.threshold;
+
+
 		readInfoFile(infoFile, data_number, datatype, dimension, space, file_list);
 		SourceVolume source_volume(file_list, dimension.x, dimension.y, dimension.z, datatype);
 		source_volume.loadVolume();
@@ -206,5 +211,5 @@ int main(int argc, char* argv[])
 	{
 		vm::println("{}", e.what());
 	}
-	getchar();
+	//getchar();
 }

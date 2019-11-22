@@ -10,10 +10,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Vector2Image.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Vector2Image.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
+    <ProjectGuid>{FAEF3CA1-FD19-4319-80D4-F9A1FC1F642B}</ProjectGuid>
     <Keyword>QtVS_v301</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -28,13 +34,13 @@
   <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
     <QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>D:\Eigen;E:\project\science_project\VoxelClassification\VoxelClassification\VMUtils\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>D:\Eigen;E:\project\science_project\VoxelClassification\VoxelClassification\VMUtils\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\project\science_project\VoxelClassification\Vec2Image\VMUtils\include;D:\Qt\Qt5.12.3\5.12.3\msvc2017_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Qt\Qt5.12.3\5.12.3\msvc2017_64\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
@@ -52,12 +58,9 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>msvc2017_64_qt5_12_3</QtInstall>
-    <QtModules>3dcore 3danimation 3dextras 3dinput 3dlogic 3drender;core;gui;network;opengl;openglextensions;printsupport;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>msvc2017_64_qt5_12_3</QtInstall>
-    <QtModules>3dcore 3danimation 3dextras 3dinput 3dlogic 3drender;core;gui;network;opengl;openglextensions;printsupport;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -71,7 +74,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -87,43 +90,9 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="data2word.cpp" />
-    <ClCompile Include="linelib.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="ParameterControlWidget.cpp" />
-    <ClCompile Include="SliceView.cpp" />
-    <ClCompile Include="SourceVolume.cpp" />
-    <ClCompile Include="TrainNetwork.cpp" />
-    <ClCompile Include="VolumeSegmentation.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="MainWindow.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="MainWindow.ui" />
-    <QtUic Include="ParameterControlWidget.ui" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="MainWindow.qrc" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="ParameterControlWidget.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="SliceView.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="cmdline.h" />
-    <ClInclude Include="data2word.h" />
-    <ClInclude Include="linelib.h" />
-    <ClInclude Include="SourceVolume.h" />
-    <ClInclude Include="TrainNetwork.h" />
-    <ClInclude Include="VolumeSegmentation.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

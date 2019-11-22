@@ -1,7 +1,7 @@
 {
   "vifo_file_name": "F:/TOOTH_8bit_128_128_160/TOOTH_8bit_128_128_160.vifo",
   "volume_index": 0,
-  "prefix": "J:/PTE buffer/TOOTH_8bit_128_128_160_",
+  "file_prefix": "J:/PTE buffer/TOOTH_8bit_128_128_160_",
   "output_ww_net": "ww.net",
   "output_word_node": "words.node",
   "output_lw_net":  "lw.net",

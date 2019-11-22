@@ -24,6 +24,7 @@ public:
 
 public slots:
 	void slot_ImportVifoFile();
+	void importJsonFile(const std::string& fileName);
 	void slot_ImportJsonFile();
 	void slot_SaveWWNet();
 	void slot_SaveWordNode();

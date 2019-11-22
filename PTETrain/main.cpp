@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 		vm::println("{}", e.what());
 	}
 
-	getchar();
+	//getchar();
 	return 0;
 
 }

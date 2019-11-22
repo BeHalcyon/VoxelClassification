@@ -9,7 +9,9 @@
 #include <QDialog>
 #include <QMessageBox>
 #include "VolumeSegmentation.h"
-
+#include "cmdline.h"
+#include <vector>
+#include <string>
 
 struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
 {
@@ -94,6 +96,30 @@ MainWindow::MainWindow(QWidget *parent)
 	setCentralWidget(slice_view);
 
 	setConnectionState();
+
+	auto parameter = qApp->arguments();
+
+	if(parameter.size()>1)
+	{
+		cmdline::parser cmd;
+		
+		
+		//std::vector<const char*> argv(argc);
+		std::vector<std::string> stdstring_list(parameter.size());
+		std::vector<const char*> argv(parameter.size());
+		for(auto i=0;i< parameter.size();i++)
+		{
+			stdstring_list[i] = parameter.at(i).toStdString();
+			argv[i] = stdstring_list[i].c_str();
+			//std::cout << stdstring_list[i] << endl;
+		}
+		cmd.add<std::string>("prepare_file", 'p', "json data for preparing", true, "");
+		//cmd.parse_check(parameter.size(), &argv[0]);
+		cmd.parse_check(stdstring_list);
+
+		std::cout << cmd.get<std::string>("prepare_file") << std::endl;
+		importJsonFile(cmd.get<std::string>("prepare_file"));
+	}
 }
 
 void MainWindow::setConnectionState()
@@ -552,6 +578,63 @@ void MainWindow::slot_ImportVifoFile()
 	is_vifo_file_loaded = true;
 }
 
+void MainWindow::importJsonFile( const std::string & fileName)
+{
+	std::cout << fileName << std::endl;
+
+
+	try
+	{
+		std::ifstream input_file(fileName);
+		input_file >> JSON;
+
+		vm::json::Writer writer;
+		writer.write(std::cout, JSON);
+
+		infoFileName = JSON.vifo_file_name;
+
+		auto volume_index = JSON.volume_index;
+		//infoFileName = fileName.toStdString();
+		readInfoFile(infoFileName, data_number, datatype, dimension, space, file_list);
+
+
+		file_path = file_list[volume_index].substr(0, file_list[volume_index].find_last_of('.'));
+
+		source_volume = SourceVolume(file_list, dimension.x, dimension.y, dimension.z, datatype);
+
+		//source_volume.loadVolume();	//origin data
+		source_volume.loadRegularVolume(); //[0, 255] data
+
+		volume_data = *source_volume.getRegularVolume(0);
+
+		std::cout << "The regular volume data has been loaded." << std::endl;
+
+		parameter_control_widget->ui.spinBox_XDim->setValue(dimension.x);
+		parameter_control_widget->ui.spinBox_XDim->setEnabled(false);
+		parameter_control_widget->ui.spinBox_YDim->setValue(dimension.y);
+		parameter_control_widget->ui.spinBox_YDim->setEnabled(false);
+		parameter_control_widget->ui.spinBox_ZDim->setValue(dimension.z);
+		parameter_control_widget->ui.spinBox_ZDim->setEnabled(false);
+
+		parameter_control_widget->ui.spinBox_Slice_index->setMaximum(dimension.z - 1);
+
+		slice_view->updateImage(volume_data, dimension, plane_mode, slice_id);
+
+		is_drawed = true;
+		is_volume2word_calculated = false;
+		is_vifo_file_loaded = true;
+
+		is_json_file_loaded = true;
+
+		parameter_control_widget->ui.spinBox_window_size->setValue(JSON.window_size);
+
+	}
+	catch (std::exception & e)
+	{
+		vm::println("{}", e.what());
+	}
+}
+
 void MainWindow::slot_ImportJsonFile()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, "Open json File", "./",
@@ -560,45 +643,7 @@ void MainWindow::slot_ImportJsonFile()
 	if (fileName.isEmpty())
 		return;
 
-	std::ifstream input_file(fileName.toStdString());
-	input_file >> JSON;
-
-	infoFileName = JSON.vifo_file_name;
-
-	auto volume_index = JSON.volume_index;
-	//infoFileName = fileName.toStdString();
-	readInfoFile(infoFileName, data_number, datatype, dimension, space, file_list);
-
-
-	file_path = file_list[volume_index].substr(0, file_list[volume_index].find_last_of('.'));
-
-	source_volume = SourceVolume(file_list, dimension.x, dimension.y, dimension.z, datatype);
-
-	//source_volume.loadVolume();	//origin data
-	source_volume.loadRegularVolume(); //[0, 255] data
-
-	volume_data = *source_volume.getRegularVolume(0);
-
-	std::cout << "The regular volume data has been loaded." << std::endl;
-
-	parameter_control_widget->ui.spinBox_XDim->setValue(dimension.x);
-	parameter_control_widget->ui.spinBox_XDim->setEnabled(false);
-	parameter_control_widget->ui.spinBox_YDim->setValue(dimension.y);
-	parameter_control_widget->ui.spinBox_YDim->setEnabled(false);
-	parameter_control_widget->ui.spinBox_ZDim->setValue(dimension.z);
-	parameter_control_widget->ui.spinBox_ZDim->setEnabled(false);
-
-	parameter_control_widget->ui.spinBox_Slice_index->setMaximum(dimension.z - 1);
-
-	slice_view->updateImage(volume_data, dimension, plane_mode, slice_id);
-
-	is_drawed = true;
-	is_volume2word_calculated = false;
-	is_vifo_file_loaded = true;
-
-	is_json_file_loaded = true;
-
-	parameter_control_widget->ui.spinBox_window_size->setValue(JSON.window_size);
+	importJsonFile(fileName.toStdString());
 }
 
 void MainWindow::slot_SaveWWNet()
