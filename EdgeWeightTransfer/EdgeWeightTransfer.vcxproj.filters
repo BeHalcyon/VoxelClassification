@@ -15,30 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VolumeSegmentation.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SourceVolume.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="VolumeSegmentation.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SourceVolume.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="cmdline.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="kernel.cu">
-      <Filter>源文件</Filter>
-    </CudaCompile>
   </ItemGroup>
 </Project>

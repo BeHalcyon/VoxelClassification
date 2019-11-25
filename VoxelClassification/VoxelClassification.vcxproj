@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClInclude Include="cmdline.h" />
     <ClInclude Include="data2word.h" />
+    <ClInclude Include="json_struct.h" />
     <ClInclude Include="linelib.h" />
     <ClInclude Include="SourceVolume.h" />
     <ClInclude Include="TrainNetwork.h" />

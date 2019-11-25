@@ -13,23 +13,25 @@
 #include <vector>
 #include <string>
 
-struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
-{
-	VM_JSON_FIELD(std::string, vifo_file_name);
-	VM_JSON_FIELD(int, volume_index);
+#include "json_struct.h"
 
-	VM_JSON_FIELD(std::string, file_prefix);
+struct InputFileJSONStruct JSON;
 
-
-	VM_JSON_FIELD(std::string, output_ww_net);
-	VM_JSON_FIELD(std::string, output_word_node);
-	VM_JSON_FIELD(std::string, output_lw_net);
-	VM_JSON_FIELD(std::string, output_label_node);
-	VM_JSON_FIELD(std::string, output_text_hin);
-	VM_JSON_FIELD(std::string, output_text_node);
-	VM_JSON_FIELD(int, window_size);
-	VM_JSON_FIELD(int, edge_weight_type);
-}JSON;
+// struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
+// {
+// 	VM_JSON_FIELD(std::string, vifo_file_name);
+// 	VM_JSON_FIELD(int, volume_index);
+//
+// 	VM_JSON_FIELD(std::string, file_prefix);
+// 	VM_JSON_FIELD(std::string, output_ww_net);
+// 	VM_JSON_FIELD(std::string, output_word_node);
+// 	VM_JSON_FIELD(std::string, output_lw_net);
+// 	VM_JSON_FIELD(std::string, output_label_node);
+// 	VM_JSON_FIELD(std::string, output_text_hin);
+// 	VM_JSON_FIELD(std::string, output_text_node);
+// 	VM_JSON_FIELD(int, window_size);
+// 	VM_JSON_FIELD(int, edge_weight_type);
+// }JSON;
 
 
 void readInfoFile(const std::string& infoFileName, int& data_number, std::string& datatype, hxy::my_int3& dimension, hxy::my_double3& space,
@@ -113,12 +115,12 @@ MainWindow::MainWindow(QWidget *parent)
 			argv[i] = stdstring_list[i].c_str();
 			//std::cout << stdstring_list[i] << endl;
 		}
-		cmd.add<std::string>("prepare_file", 'p', "json data for preparing", true, "");
+		cmd.add<std::string>("configure_json", 'c', "json data for preparing", true, "");
 		//cmd.parse_check(parameter.size(), &argv[0]);
 		cmd.parse_check(stdstring_list);
 
-		std::cout << cmd.get<std::string>("prepare_file") << std::endl;
-		importJsonFile(cmd.get<std::string>("prepare_file"));
+		std::cout << cmd.get<std::string>("configure_json") << std::endl;
+		importJsonFile(cmd.get<std::string>("configure_json"));
 	}
 }
 
@@ -269,7 +271,7 @@ void MainWindow::setConnectionState()
 	connect(parameter_control_widget->ui.pushButton__save_ww_lw_net, &QPushButton::clicked, [this]()
 	{
 		if (is_json_file_loaded)
-			slot_SaveWordLabelNet(JSON.edge_weight_type);
+			slot_SaveWordLabelNet(0);
 		//默认权重为1
 		else
 			slot_SaveWordLabelNet();
@@ -283,7 +285,7 @@ void MainWindow::setConnectionState()
 		slot_SaveWordLabelNode();
 
 		if (is_json_file_loaded)
-			slot_SaveWordLabelNet(JSON.edge_weight_type);
+			slot_SaveWordLabelNet(0);
 		//默认权重为1
 		else
 			slot_SaveWordLabelNet();
@@ -518,6 +520,19 @@ void MainWindow::slot_ExportNetAndNodeFile()
 			}
 		}
 	}
+	else if(window_size == 0)
+	{
+
+		for (auto i = 0; i < label_array.size(); i++)
+		{
+			for (auto index = 0; index < label_array[i].size(); index++)
+			{
+				auto center_index = label_array[i][index];
+
+				context_label[i][volume_data[center_index]]++;
+			}
+		}
+	}
 
 	//保存为文件
 
@@ -582,7 +597,6 @@ void MainWindow::importJsonFile( const std::string & fileName)
 {
 	std::cout << fileName << std::endl;
 
-
 	try
 	{
 		std::ifstream input_file(fileName);
@@ -591,9 +605,9 @@ void MainWindow::importJsonFile( const std::string & fileName)
 		vm::json::Writer writer;
 		writer.write(std::cout, JSON);
 
-		infoFileName = JSON.vifo_file_name;
+		infoFileName = JSON.data_path.vifo_file;
 
-		auto volume_index = JSON.volume_index;
+		auto volume_index = JSON.data_path.volume_index;
 		//infoFileName = fileName.toStdString();
 		readInfoFile(infoFileName, data_number, datatype, dimension, space, file_list);
 
@@ -626,7 +640,7 @@ void MainWindow::importJsonFile( const std::string & fileName)
 
 		is_json_file_loaded = true;
 
-		parameter_control_widget->ui.spinBox_window_size->setValue(JSON.window_size);
+		parameter_control_widget->ui.spinBox_window_size->setValue(JSON.data_prepare.window_size);
 
 	}
 	catch (std::exception & e)
@@ -663,7 +677,7 @@ void MainWindow::slot_SaveWWNet()
 	}
 	if(is_json_file_loaded)
 	{
-		volume2word.saveNet(JSON.file_prefix + JSON.output_ww_net);
+		volume2word.saveNet(JSON.data_path.file_prefix + JSON.file_name.ww_net_origin_file);
 	}
 	else
 	{
@@ -690,7 +704,7 @@ void MainWindow::slot_SaveWordNode()
 	}
 	if (is_json_file_loaded)
 	{
-		volume2word.saveWords(JSON.file_prefix + JSON.output_word_node);
+		volume2word.saveWords(JSON.data_path.file_prefix + JSON.file_name.word_node_file);
 	}
 	else
 	{
@@ -795,7 +809,7 @@ void MainWindow::slot_SaveLWNet()
 	FILE* fo = nullptr;
 	if(is_json_file_loaded)
 	{
-		std::string file_name = JSON.file_prefix + JSON.output_word_node;
+		std::string file_name = JSON.data_path.file_prefix + JSON.file_name.lw_net_origin_file;
 		fo = fopen(file_name.c_str(), "wb");
 	}
 	else
@@ -834,7 +848,7 @@ void MainWindow::slot_SaveLabelNode()
 	FILE* fo = nullptr;
 	if(is_json_file_loaded)
 	{
-		std::string file_name = JSON.file_prefix + JSON.output_label_node;
+		std::string file_name = JSON.data_path.file_prefix + JSON.file_name.label_node_file;
 		fo = fopen(file_name.c_str(), "wb");
 	}
 	else
@@ -870,9 +884,22 @@ void MainWindow::slot_SaveWordLabelNet(const int edge_weight_type)
 	auto neighbor_histogram = volume2word.getNeighborHistogram();
 
 	//使用原始的权重列表
-	if(edge_weight_type == 1)
+	if(edge_weight_type==0)
 	{
 		
+	}
+	//使用1权重列表
+	else if(edge_weight_type == 1)
+	{
+		for (auto& i : neighbor_histogram)
+		{
+			//auto max_value = 0.0;
+			auto degree = 0;
+			for (double& j : i)
+			{
+				if (j > 0) j = 1;
+			}
+		}
 	}
 	//使用规则化权重列表
 	else if(edge_weight_type == 2)
@@ -892,11 +919,30 @@ void MainWindow::slot_SaveWordLabelNet(const int edge_weight_type)
 			}
 		}
 	}
+	//权重为1时的归一化
+	else if(edge_weight_type==3)
+	{
+		for (auto& i : neighbor_histogram)
+		{
+			//auto max_value = 0.0;
+			auto degree = 0;
+			for (double j : i)
+			{
+				if (j > 0) degree++;
+			}
+			if (degree == 0.0) continue;
+
+			for (double& j : i)
+			{
+				j = 1.0 / degree;
+			}
+		}
+	}
 
 	FILE *fo = nullptr;
 	if(is_json_file_loaded)
 	{
-		std::string file_name = JSON.file_prefix + JSON.output_text_hin;
+		std::string file_name = JSON.data_path.file_prefix + JSON.file_name.text_hin_origin_file;
 		fo = fopen(file_name.c_str(), "wb");
 	}
 	else
@@ -916,7 +962,7 @@ void MainWindow::slot_SaveWordLabelNet(const int edge_weight_type)
 			if (neighbor_histogram[i][j] > 0)
 			{
 				//Debug 20191121
-				fprintf(fo, "%s %s %lf w\n", std::to_string(i).c_str(), std::to_string(j).c_str(), edge_weight_type ? neighbor_histogram[i][j] : 1);
+				fprintf(fo, "%s %s %lf w\n", std::to_string(i).c_str(), std::to_string(j).c_str(), neighbor_histogram[i][j]);
 				//fprintf(fo, "%s %s %d w\n", std::to_string(i).c_str(), std::to_string(j).c_str(), 1);
 			}
 			cnt++;
@@ -936,7 +982,7 @@ void MainWindow::slot_SaveWordLabelNet(const int edge_weight_type)
 			{
 				//Debug 20191121
 				//fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, context_label[m][n]);
-				fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, edge_weight_type ? context_label[m][n]:1);
+				fprintf(fo, "%s %d %d l\n", label_name.toStdString().c_str(), n, edge_weight_type ?1: context_label[m][n]);
 			}
 		}
 	}
@@ -967,7 +1013,7 @@ void MainWindow::slot_SaveWordLabelNode()
 	FILE* fo;
 	if(is_json_file_loaded)
 	{
-		std::string file_name = JSON.file_prefix + JSON.output_text_node;
+		std::string file_name = JSON.data_path.file_prefix + JSON.file_name.text_node_file;
 		fo = fopen(file_name.c_str(), "w");
 	}
 	else

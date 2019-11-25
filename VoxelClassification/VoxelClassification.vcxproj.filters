@@ -96,5 +96,8 @@
     <ClInclude Include="VolumeSegmentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="json_struct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

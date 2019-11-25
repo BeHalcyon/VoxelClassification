@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VolumeSegmentation", "Volum
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vec2Image", "Vec2Image\Vec2Image.vcxproj", "{FAEF3CA1-FD19-4319-80D4-F9A1FC1F642B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EdgeWeightTransfer", "EdgeWeightTransfer\EdgeWeightTransfer.vcxproj", "{F03CE86D-26FB-49B2-A918-D8DE86785832}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -47,6 +49,14 @@ Global
 		{FAEF3CA1-FD19-4319-80D4-F9A1FC1F642B}.Release|x64.ActiveCfg = Release|x64
 		{FAEF3CA1-FD19-4319-80D4-F9A1FC1F642B}.Release|x64.Build.0 = Release|x64
 		{FAEF3CA1-FD19-4319-80D4-F9A1FC1F642B}.Release|x86.ActiveCfg = Release|x64
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Debug|x64.ActiveCfg = Debug|x64
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Debug|x64.Build.0 = Debug|x64
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Debug|x86.ActiveCfg = Debug|Win32
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Debug|x86.Build.0 = Debug|Win32
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Release|x64.ActiveCfg = Release|x64
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Release|x64.Build.0 = Release|x64
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Release|x86.ActiveCfg = Release|Win32
+		{F03CE86D-26FB-49B2-A918-D8DE86785832}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

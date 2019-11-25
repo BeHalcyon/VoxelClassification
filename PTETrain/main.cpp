@@ -1,29 +1,31 @@
 #include <iostream>
-#include "VMUtils/include/VMUtils/json_binding.hpp"
-#include "VMUtils/include/VMUtils/cmdline.hpp"
+//#include "VMUtils/include/VMUtils/json_binding.hpp"
+//#include "VMUtils/include/VMUtils/cmdline.hpp"
 #include <string>
 #include <fstream>
 #include "TrainNetwork.h"
+#include "../VoxelClassification/json_struct.h"
+#include "../VoxelClassification/VMUtils/include/VMUtils/cmdline.hpp"
+struct InputFileJSONStruct JSON;
 
-
-struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
-{
-	VM_JSON_FIELD(int, vector_size);
-	VM_JSON_FIELD(int, sample_number);
-	VM_JSON_FIELD(double, alpha);
-	VM_JSON_FIELD(int, thread_number);
-	//VM_JSON_FIELD(int, window_size);
-	VM_JSON_FIELD(int, negative_number);
-
-	VM_JSON_FIELD(std::string, file_prefix);
-
-	VM_JSON_FIELD(std::string, input_text_node);
-	VM_JSON_FIELD(std::string, input_word_node);
-	VM_JSON_FIELD(std::string, input_text_hin);
-	VM_JSON_FIELD(std::string, output_word_embedding);
-	VM_JSON_FIELD(std::string, output_node_embedding);
-
-}JSON;
+// struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
+// {
+// 	VM_JSON_FIELD(int, vector_size);
+// 	VM_JSON_FIELD(int, sample_number);
+// 	VM_JSON_FIELD(double, alpha);
+// 	VM_JSON_FIELD(int, thread_number);
+// 	//VM_JSON_FIELD(int, window_size);
+// 	VM_JSON_FIELD(int, negative_number);
+//
+// 	VM_JSON_FIELD(std::string, file_prefix);
+//
+// 	VM_JSON_FIELD(std::string, input_text_node);
+// 	VM_JSON_FIELD(std::string, input_word_node);
+// 	VM_JSON_FIELD(std::string, input_text_hin);
+// 	VM_JSON_FIELD(std::string, output_word_embedding);
+// 	VM_JSON_FIELD(std::string, output_node_embedding);
+//
+// }JSON;
 
 
 
@@ -40,10 +42,10 @@ int main(int argc, char* argv[])
 	{
 		// create a parser
 		cmdline::parser a;
-		a.add<std::string>("train_file", 't', "configure json file for training", true, "");
+		a.add<std::string>("configure_json", 'c', "configure json file for training", true, "");
 		a.parse_check(argc, argv);
 
-		json_file_path = a.get<std::string>("train_file");
+		json_file_path = a.get<std::string>("configure_json");
 	}
 
 	std::ifstream json_file(json_file_path);
@@ -54,19 +56,19 @@ int main(int argc, char* argv[])
 		writer.write(std::cout, JSON);
 
 
-		const auto vector_size = JSON.vector_size;
-		const auto sample_number = JSON.sample_number*1000000;
-		const auto alpha = JSON.alpha;
-		int negative_number = JSON.negative_number;
-		int num_threads = JSON.thread_number;
+		const auto vector_size = JSON.train_process.train_vector_size;
+		const auto sample_number = JSON.train_process.train_sample_number*1000000;
+		const auto alpha = JSON.train_process.train_alpha;
+		int negative_number = JSON.train_process.train_negative_number;
+		int num_threads = JSON.train_process.train_thread_number;
 
 
-		std::string file_prefix = JSON.file_prefix;
-		std::string input_text_node = file_prefix + JSON.input_text_node;
-		std::string input_word_node = file_prefix + JSON.input_word_node;
-		std::string input_text_hin = file_prefix + JSON.input_text_hin;
-		std::string output_word_embedding = file_prefix + JSON.output_word_embedding;
-		std::string output_node_embedding = file_prefix + JSON.output_node_embedding;
+		std::string file_prefix = JSON.data_path.file_prefix;
+		std::string input_text_node = file_prefix + JSON.file_name.text_node_file;
+		std::string input_word_node = file_prefix + JSON.file_name.word_node_file;
+		std::string input_text_hin = file_prefix + JSON.file_name.text_hin_file;
+		std::string output_word_embedding = file_prefix + JSON.file_name.word_embedding_file;
+		std::string output_node_embedding = file_prefix + JSON.file_name.all_embedding_file;
 		
 
 		auto train_network = std::make_unique<TrainNetwork>(input_text_node, input_word_node, input_text_hin, vector_size,
@@ -77,6 +79,7 @@ int main(int argc, char* argv[])
 		train_network->saveLabelEmbedding(output_node_embedding);
 
 		std::cout << "Train process is over." << std::endl;
+
 	}
 	catch (std::exception & e)
 	{

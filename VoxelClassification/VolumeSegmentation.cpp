@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include "omp.h"
 
 VolumeSegmentation::VolumeSegmentation()
 {
@@ -35,6 +36,7 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 		const int dy26[26] = { -1, -1, -1,  0,  0,  0,  1,  1,  1, -1, -1, -1,  0,  0,  1,  1,  1, -1, -1, -1,  0,  0,  0,  1,  1,  1 };
 		const int dz26[26] = { -1, -1, -1, -1, -1, -1, -1, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1 };
 
+#pragma omp parallel for
 		for (auto index = 0; index < sz; index++)
 		{
 			std::vector<float> average_vector(vector_size, 0);
@@ -106,7 +108,7 @@ void VolumeSegmentation::segemation(const std::vector<unsigned char>& volume_dat
 		const int dy6[6] = { 0,  0, -1,  1,  0,  0 };
 		const int dz6[6] = { 0,  0,  0,  0, -1,  1 };
 
-
+#pragma omp parallel for
 		for (auto index = 0; index < sz; index++)
 		{
 			std::vector<float> average_vector(vector_size, 0);
