@@ -266,7 +266,7 @@ void VolumeSegmentation::segemationGPU(const std::vector<unsigned char>& volume_
 			idx++;
 		}
 		gpuAssert(cudaMalloc((void**)&d_label_vector, label_vector.size() * sizeof(float)));
-		gpuAssert(cudaMemcpy(d_label_vector, word_vector.data(), label_vector.size() * sizeof(float), cudaMemcpyHostToDevice));
+		gpuAssert(cudaMemcpy(d_label_vector, label_vector.data(), label_vector.size() * sizeof(float), cudaMemcpyHostToDevice));
 
 		int thread_number = 512;
 		int block_number = sz / thread_number + 1;

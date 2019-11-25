@@ -101,7 +101,7 @@ void kernel_segmentation(unsigned char* d_volume_data, const int sz, const int x
 	for (auto j = 0; j < vector_size; j++) average_vector[j] /= cnt;
 
 	//判断该数组与label数组的关系
-	float max_value = -0xffff;
+	float max_value = -0xffffff;
 
 	cnt = 0;
 
@@ -125,12 +125,7 @@ void kernel_segmentation(unsigned char* d_volume_data, const int sz, const int x
 	segmentation_data[index] = 10 * cnt;
 
 }
-__global__
-void kernelTest()
-{
-	const unsigned int index = blockIdx.x*blockDim.x + threadIdx.x;
-	printf("%d\n", index);
-}
+
 
 extern "C" void kernelSegmentation(int block_number, int thread_number, unsigned char* d_volume_data, const int sz, const int xDim, const int yDim, const int zDim,
 	const float threshold, const int window_size,
