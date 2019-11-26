@@ -28,7 +28,6 @@ struct InputFileJSONStruct JSON;
 // }JSON;
 
 
-
 int main(int argc, char* argv[])
 {
 	std::string json_file_path;

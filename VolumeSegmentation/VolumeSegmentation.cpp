@@ -214,7 +214,7 @@ void VolumeSegmentation::segemationGPU(const std::vector<unsigned char>& volume_
 	std::map<std::string, std::vector<float>>&label_map, const int & window_size, const int & vector_size, std::vector<int>& segementaion_data,
 	const double & threshold)
 {
-	if (window_size == 3|| window_size == 1)
+	if (window_size == 3 || window_size == 1||window_size==5)
 	{
 		const auto sz = width * height * depth;
 		const auto& xDim = width;

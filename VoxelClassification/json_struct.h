@@ -29,6 +29,7 @@ struct DataPrepareJSONStruct : public vm::json::Serializable<DataPrepareJSONStru
 	VM_JSON_FIELD(int, window_size);
 	VM_JSON_FIELD(int, ww_edge_weight_type);
 	VM_JSON_FIELD(int, lw_edge_weight_type);
+	VM_JSON_FIELD(std::string, graph_json_file);
 };
 
 struct TrainProcessJSONStruct : public vm::json::Serializable<TrainProcessJSONStruct>
@@ -38,7 +39,14 @@ struct TrainProcessJSONStruct : public vm::json::Serializable<TrainProcessJSONSt
 	VM_JSON_FIELD(double, train_alpha);
 	VM_JSON_FIELD(int, train_thread_number);
 	VM_JSON_FIELD(int, train_negative_number);
+
 };
+
+struct ValuePredictionJSONStruct : public vm::json::Serializable<ValuePredictionJSONStruct>
+{
+	VM_JSON_FIELD(std::string, word_embedding_json);
+};
+
 
 struct SegmentationProcessJSONStruct : public vm::json::Serializable<SegmentationProcessJSONStruct>
 {
@@ -59,6 +67,7 @@ struct InputFileJSONStruct : public vm::json::Serializable<InputFileJSONStruct>
 	VM_JSON_FIELD(FileNameJSONStruct, file_name);
 	VM_JSON_FIELD(DataPrepareJSONStruct, data_prepare);
 	VM_JSON_FIELD(TrainProcessJSONStruct, train_process);
+	VM_JSON_FIELD(ValuePredictionJSONStruct, value_prediction);
 	VM_JSON_FIELD(SegmentationProcessJSONStruct, segmenation_process);
 	VM_JSON_FIELD(SimilarityProcessJSONStruct, similarity_process);
 

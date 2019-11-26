@@ -181,8 +181,26 @@ void Volume2Word::saveWords(const std::string & output_words_file)
 	* "
 	*/
 	FILE* fo = fopen(output_words_file.c_str(), "w");
-	for (int k = 0; k < num_vertices; k++) 
-		fprintf(fo, "%s\n", std::to_string(vertex[vertex_hash_table[k]].intword).c_str());
+	// for (int k = 0; k < num_vertices; k++)
+	// {
+	// 	
+	// 	fprintf(fo, "%s\n", std::to_string(vertex[vertex_hash_table[k]].intword).c_str());
+	// }
+
+	for(auto i=0;i<neighbor_histogram.size();i++)
+	{
+		auto j = 0;
+		for(;j<neighbor_histogram.size();j++)
+		{
+			if (neighbor_histogram[i][j] > 0)
+			{
+				break;
+			}
+		}
+		fprintf(fo, "%s\n",
+			std::to_string(i).c_str());
+	}
+
 	fclose(fo);
 
 	printf("The words.node file has been saved.\n");

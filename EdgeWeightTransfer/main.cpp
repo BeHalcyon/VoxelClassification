@@ -26,6 +26,26 @@ struct lw_net
 	double w;
 };
 
+struct NodesJsonStruct: public vm::json::Serializable<NodesJsonStruct>
+{
+	VM_JSON_FIELD(std::string, id);
+	VM_JSON_FIELD(int, group);
+};
+
+struct LinksJsonStruct: public vm::json::Serializable<LinksJsonStruct>
+{
+	VM_JSON_FIELD(std::string, source);
+	VM_JSON_FIELD(std::string, target);
+	VM_JSON_FIELD(float, value);
+};
+
+struct OutputFileJsonStruct : public vm::json::Serializable<OutputFileJsonStruct>
+{
+	VM_JSON_FIELD(std::vector<NodesJsonStruct>, nodes);
+	VM_JSON_FIELD(std::vector<LinksJsonStruct>, links);
+}OUTPUT_JSON;
+
+
 void transWWNet(const std::string & ww_net_origin_file, const std::string & ww_net_file, const int & edge_type, std::vector<std::vector<double>>& ww_vec)
 {
 	std::map<ww_net, double> ww_map;
@@ -55,7 +75,7 @@ void transWWNet(const std::string & ww_net_origin_file, const std::string & ww_n
 		return;
 	}
 	//基于权重的归一化
-	else if (edge_type == 1)
+	else if (edge_type == 2)
 	{
 		for (auto& i : ww_vec)
 		{
@@ -72,7 +92,7 @@ void transWWNet(const std::string & ww_net_origin_file, const std::string & ww_n
 		}
 	}
 	//权重均为1
-	else if (edge_type == 2)
+	else if (edge_type == 1)
 	{
 		for (auto& i : ww_vec)
 		{
@@ -220,6 +240,68 @@ void transTextHin(const std::string & text_hin_origin_file, const std::string & 
 	printf("The text.hin file has been transferred.\n");
 }
 
+void outputJson(const std::string & input_word_node_file, const std::string & input_label_node_file, const std::string & output_json_file, std::vector<std::vector<double>>& ww_vec, std::vector<lw_net>& lw_map)
+{
+	std::vector<NodesJsonStruct> nodes;
+	std::vector<LinksJsonStruct> links;
+
+	FILE *fi = fopen(input_word_node_file.c_str(), "rb");
+	int u;
+	while (fscanf(fi, "%d", &u) == 1)
+	{
+		struct  NodesJsonStruct buf;
+		buf.set_id<std::string>(std::to_string(u));
+		buf.set_group<int>(1);
+		nodes.push_back(buf);
+	}
+	fclose(fi);
+
+	fi = fopen(input_label_node_file.c_str(), "rb");
+	char label[100];
+	while (fscanf(fi, "%s", label) == 1)
+	{
+		struct NodesJsonStruct buf;
+		buf.set_id<std::string>(std::string(label));
+		buf.set_group<int>(2);
+		nodes.push_back(buf);
+	}
+	fclose(fi);
+
+	for(auto i=0;i<ww_vec.size();i++)
+	{
+		for(auto j=i+1;j<ww_vec[i].size();j++)
+		{
+			if(ww_vec[i][j]> 0)
+			{
+				struct LinksJsonStruct buf;
+				buf.set_source<std::string>(std::to_string(i));
+				buf.set_target<std::string>(std::to_string(j));
+				buf.set_value(ww_vec[i][j]);
+				links.push_back(buf);
+			}
+		}
+	}
+
+	
+	for(auto &i:lw_map)
+	{
+		struct LinksJsonStruct buf;
+		buf.set_source(i.a);
+		buf.set_target(i.b);
+		buf.set_value<float>(1);
+		links.push_back(buf);
+	}
+
+	OUTPUT_JSON.set_links(links);
+	OUTPUT_JSON.set_nodes(nodes);
+
+
+	ofstream output_json_stream(output_json_file);
+	vm::json::Writer writer;
+	writer.write(output_json_stream, OUTPUT_JSON);
+
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -265,6 +347,12 @@ int main(int argc, char* argv[])
 		transWWNet(ww_net_origin_file, ww_net_file, ww_edge_type, ww_vec);
 		transLWNet(lw_net_origin_file, lw_net_file, lw_edge_type, lw_vec);
 		transTextHin(text_hin_origin_file, text_hin_file, ww_edge_type, lw_edge_type, ww_vec, lw_vec);
+
+		std::string input_word_node_file = file_prefix + JSON.file_name.word_node_file;
+		std::string input_label_node_file = file_prefix + JSON.file_name.label_node_file;
+		std::string output_json_file = file_prefix + JSON.data_prepare.graph_json_file;
+
+		outputJson(input_word_node_file, input_label_node_file, output_json_file, ww_vec, lw_vec);
 
 		auto time_end = clock();
 

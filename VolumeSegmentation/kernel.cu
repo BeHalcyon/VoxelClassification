@@ -2,6 +2,10 @@
 #include <helper_cuda.h>
 #include <device_launch_parameters.h>
 
+int x124[124];
+int y124[124];
+int z124[124];
+
 
 const int x26[26] = { -1,  0,  1, -1,  0,  1, -1,  0,  1, -1,  0,  1, -1,  1, -1,  0,  1, -1,  0,  1, -1,  0,  1, -1,  0,  1 };
 const int y26[26] = { -1, -1, -1,  0,  0,  0,  1,  1,  1, -1, -1, -1,  0,  0,  1,  1,  1, -1, -1, -1,  0,  0,  0,  1,  1,  1 };
@@ -11,6 +15,9 @@ const int x6[6] = { -1,  1,  0,  0,  0,  0 };
 const int y6[6] = { 0,  0, -1,  1,  0,  0 };
 const int z6[6] = { 0,  0,  0,  0, -1,  1 };
 
+__constant__ int dx124[124];
+__constant__ int dy124[124];
+__constant__ int dz124[124];
 
 __constant__ int dx26[26];
 __constant__ int dy26[26];
@@ -65,6 +72,7 @@ void kernel_segmentation(unsigned char* d_volume_data, const int sz, const int x
 	int len = 26;
 	if (window_size == 3) len = 26;
 	else if (window_size == 1) len = 1;
+	else if (window_size == 5) len = 124;
 	for (auto i = 0; i < len; i++)
 	{
 		int nx = ox;//new x
@@ -81,6 +89,12 @@ void kernel_segmentation(unsigned char* d_volume_data, const int sz, const int x
 			nx += dx6[i];
 			ny += dy6[i];
 			nz += dz6[i];
+		}
+		else if(window_size==5)
+		{
+			nx += dx124[i];
+			ny += dy124[i];
+			nz += dz124[i];
 		}
 
 		if (nx >= 0 && nx < xDim && ny >= 0 && ny < yDim && nz >= 0 && nz < zDim)
@@ -132,6 +146,23 @@ extern "C" void kernelSegmentation(int block_number, int thread_number, unsigned
 	float* word_vector, size_t word_vecotr_size,
 	int word_number, float* label_vector, size_t label_vector_size, size_t label_number, const int vector_size, int* segmentation_data)
 {
+	int idx = 0;
+	for(auto i=-2;i<=2;i++)
+	{
+		for(auto j=-2;j<=2;j++)
+		{
+			for(auto k=-2;k<=2;k++)
+			{
+				if (i == 0 && j == 0 && k == 0) continue;
+				x124[idx] = i;
+				y124[idx] = j;
+				z124[idx++] = k;
+			}
+		}
+	}
+	(cudaMemcpyToSymbol(dx124, x124, sizeof(int) * 124, 0, cudaMemcpyHostToDevice));
+	(cudaMemcpyToSymbol(dy124, y124, sizeof(int) * 124, 0, cudaMemcpyHostToDevice));
+	(cudaMemcpyToSymbol(dz124, z124, sizeof(int) * 124, 0, cudaMemcpyHostToDevice));
 	
 	(cudaMemcpyToSymbol(dx26, x26, sizeof(int) * 26, 0, cudaMemcpyHostToDevice));
 	(cudaMemcpyToSymbol(dy26, y26, sizeof(int) * 26, 0, cudaMemcpyHostToDevice));
