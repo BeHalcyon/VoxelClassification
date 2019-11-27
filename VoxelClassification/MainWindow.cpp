@@ -640,7 +640,7 @@ void MainWindow::importJsonFile( const std::string & fileName)
 
 		is_json_file_loaded = true;
 
-		parameter_control_widget->ui.spinBox_window_size->setValue(JSON.data_prepare.window_size);
+		parameter_control_widget->ui.spinBox_window_size->setValue(JSON.data_prepare.prepare_label_window_size);
 
 	}
 	catch (std::exception & e)
@@ -670,9 +670,19 @@ void MainWindow::slot_SaveWWNet()
 	if(!is_volume2word_calculated)
 	{
 		volume2word.clear();
-		volume2word.process(volume_data.data(), 
-			dimension.x, dimension.y, dimension.z, 
-			parameter_control_widget->ui.spinBox_window_size->value());
+		if(is_json_file_loaded)
+		{
+			volume2word.process(volume_data.data(),
+				dimension.x, dimension.y, dimension.z,
+				JSON.data_prepare.ww_net_window_size);
+		}
+		else
+		{
+			volume2word.process(volume_data.data(),
+				dimension.x, dimension.y, dimension.z,
+				parameter_control_widget->ui.spinBox_window_size->value());
+		}
+		
 		is_volume2word_calculated = true;
 	}
 	if(is_json_file_loaded)

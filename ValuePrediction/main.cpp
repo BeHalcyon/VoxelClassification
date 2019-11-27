@@ -209,6 +209,7 @@ int main(int argc, char* argv[])
 		cmdline::parser a;
 		a.add<std::string>("configure_json", 'c', "configure json file for segmentation", true, "");
 		a.parse_check(argc, argv);
+		json_file_path = a.get<std::string>("configure_json");
 	}
 
 	try

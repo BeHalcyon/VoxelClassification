@@ -26,10 +26,14 @@ struct FileNameJSONStruct : public vm::json::Serializable<FileNameJSONStruct>
 
 struct DataPrepareJSONStruct : public vm::json::Serializable<DataPrepareJSONStruct>
 {
-	VM_JSON_FIELD(int, window_size);
+	VM_JSON_FIELD(int, prepare_label_window_size);
+	VM_JSON_FIELD(int, ww_net_window_size);
+
 	VM_JSON_FIELD(int, ww_edge_weight_type);
 	VM_JSON_FIELD(int, lw_edge_weight_type);
 	VM_JSON_FIELD(std::string, graph_json_file);
+
+	
 };
 
 struct TrainProcessJSONStruct : public vm::json::Serializable<TrainProcessJSONStruct>
@@ -45,6 +49,8 @@ struct TrainProcessJSONStruct : public vm::json::Serializable<TrainProcessJSONSt
 struct ValuePredictionJSONStruct : public vm::json::Serializable<ValuePredictionJSONStruct>
 {
 	VM_JSON_FIELD(std::string, word_embedding_json);
+	VM_JSON_FIELD(std::string, graph_classification_file);
+	VM_JSON_FIELD(int, filter_threshold);
 };
 
 
