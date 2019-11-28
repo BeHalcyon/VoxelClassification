@@ -130,7 +130,7 @@ if __name__ == '__main__':
     if argv.shape[0]>=2:
         data_json = argv[1]
     else:
-        data_json = R'E:\project\science_project\VoxelClassification\x64\Release\configuration_json\jet_mixfrac_0051_data.json'
+        data_json = R'E:\project\science_project\VoxelClassification\x64\Release\configuration_json\TOOTH_8bit_128_128_160_data.json'
 
     with open(data_json, 'r') as load_f:
         data_json = json.load(load_f)
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     graph_classification_file = file_prefix + data_json['value_prediction']['graph_classification_file']
     threshold = data_json['value_prediction']['filter_threshold']
     if argv.shape[0] >= 3:
-        threshold = argv[2]
+        threshold = float(argv[2])
     #json_file = "J:/PTE buffer/jet_mixfrac_0051_word_label_json.json"
 
     with open(json_file) as load_json:

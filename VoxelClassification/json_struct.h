@@ -51,6 +51,7 @@ struct ValuePredictionJSONStruct : public vm::json::Serializable<ValuePrediction
 	VM_JSON_FIELD(std::string, word_embedding_json);
 	VM_JSON_FIELD(std::string, graph_classification_file);
 	VM_JSON_FIELD(int, filter_threshold);
+	VM_JSON_FIELD(std::string, pca_reduce_figure_file);
 };
 
 
